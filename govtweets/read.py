@@ -1,9 +1,14 @@
+"helper functions to read and preprocess the JSON data"
 
 import json
 
 
 def read_personal_data(data_dir='./data'):
-    "Read congressmen personal data and merge is with their social network IDs"
+    """
+    Read the congressmen personal data and merge it with their
+    social network IDs. Each entry is keyed by the twitter ID
+    so it can be connected with the tweets later.
+    """
     with open(data_dir + '/legislators-current.json') as jfile:
         # Load the senators and key them by their Bioguide ID
         legislators = {
@@ -15,7 +20,7 @@ def read_personal_data(data_dir='./data'):
             # Link each senator to their social media accounts
             person_id = person['id']['bioguide']
             legislators[person_id]['social'] = person['social']
-    # Reindes the senators data and key each entry by twitter ID
+    # Reads the senators' data and key each entry by twitter ID
     legislators = {
         person['social']['twitter_id']: person
         for person in legislators.values()
