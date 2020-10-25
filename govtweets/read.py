@@ -2,6 +2,8 @@
 
 import json
 import glob
+import datetime
+
 import pandas
 import nltk
 
@@ -31,11 +33,44 @@ def read_personal_data(data_dir='./data'):
     }
     return legislators
 
-# Compute the age of each legislator:
-# data['age'] = data.birthday.apply(lambda d: 2020 - int(d[:4]))
 
-# Average age of the party members
-# data.groupby(by='party').aggregate(np.mean).age
+def extract_term_data(person, date=None):
+    if date is None:
+        date = datetime.date.today()
+    for term in person['terms']:
+        start = datetime.date.fromisoformat(term['start'])
+        end = datetime.date.fromisoformat(term['end'])
+        if date >= start and date <= end:
+            return (start, end, term)
+    return None
+
+
+def parse_personal_data(data):
+    """
+    Convert legislators info from a dictionary into pandas DataFrame
+    and compute extra columns for the personal data.
+    """
+    records = []
+    for (twitter_id, person) in data.items():
+        term_data = extract_term_data(person)
+        if term_data is not None:
+            (start, end, term) = term_data
+            records.append({
+                'twitter_id': twitter_id,
+                'name': person['name']['official_full'],
+                'birthday': person['bio']['birthday'],
+                'gender': person['bio']['gender'],
+                'start': start,
+                'end': end,
+                'party': term['party'],
+                'type': term['type'],
+                'state': term['state'],
+                'district': term.get('district')
+            })
+    df = pandas.DataFrame.from_records(records)
+    # Compute the age of each legislator:
+    df['age'] = df.birthday.apply(lambda d: 2020 - int(d[:4]))
+    return df
 
 
 def read_tweets(data_dir='./data/tweets/', files='*.json'):
@@ -47,12 +82,21 @@ def read_tweets(data_dir='./data/tweets/', files='*.json'):
     return data
 
 
-def tokenize_tweets(data):
+def parse_tweets(data):
+    "Tokenize and extract hashtags and @names"
     tokenizer = nltk.tokenize.TweetTokenizer()
-    return data.text.apply(tokenizer.tokenize)
+    data['tokenized'] = data.text.apply(tokenizer.tokenize)
+    data['hashtags'] = data.tokenized.apply(
+        lambda words: [w[1:] for w in words if w[0] == '#'])
+    data['references'] = data.tokenized.apply(
+        lambda words: [w[1:] for w in words if w[0] == '@'])
+    return data
 
-# data['hashtags'] = data.tokenized.apply(
-#     lambda words: [w[1:] for w in words if w[0] == '#'])
-# ht = []
-# data.hashtags.aggregate(ht.extend)
-# ...use ht to generate the wordcloud
+
+def read_all(data_dir='./data/'):
+    "return two data frames: (legislators, tweets)"
+    legislators = read_personal_data(data_dir)
+    tweets = read_tweets(data_dir + "/tweets/")
+    legislators = parse_personal_data(legislators)
+    tweets = parse_tweets(tweets)
+    return (legislators, tweets)

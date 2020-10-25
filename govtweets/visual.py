@@ -1,6 +1,4 @@
 
-import govtweets.read
-
 import wordcloud
 
 
