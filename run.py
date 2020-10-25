@@ -19,11 +19,17 @@ def compute_frequencies(column):
 
 
 def recolor_red(word, font_size, position, orientation, random_state=None, **kwargs):
-    return "rgb(%d%%, 0%%, 0%%)" % random.randint(60, 100)
+    return "rgb(%d%%, %d%%, %d%%)" % (
+        random.randint(60, 100),
+        random.randint(0, 15),
+        random.randint(0, 15))
 
 
 def recolor_blue(word, font_size, position, orientation, random_state=None, **kwargs):
-    return "rgb(0%%, 0%%, %d%%)" % random.randint(60, 100)
+    return "rgb(%d%%, %d%%, %d%%)" % (
+        random.randint(0, 15),
+        random.randint(0, 30),
+        random.randint(60, 100))
 
 
 def _main():
@@ -39,8 +45,8 @@ def _main():
     ht_rep = compute_frequencies(ht_by_party.hashtags[ht_by_party.index == 'Republican'])
     ht_dem = compute_frequencies(ht_by_party.hashtags[ht_by_party.index == 'Democrat'])
 
-    img_rep = numpy.array(PIL.Image.open("./data/images/elephant.png"))[:1600,:,:]
-    img_dem = numpy.array(PIL.Image.open("./data/images/donkey.png"))[:1600,:,:]
+    img_rep = numpy.array(PIL.Image.open("./data/images/elephant.png"))
+    img_dem = numpy.array(PIL.Image.open("./data/images/donkey.png"))
 
     wc_rep = wordcloud.WordCloud(
         background_color='white',
@@ -54,18 +60,17 @@ def _main():
         width=1600, height=1024
         ).generate_from_frequencies(ht_dem)
 
-    plt.subplot(2, 1, 1)
-    plt.imshow(wc_rep.recolor(color_func=recolor_red), interpolation="bilinear")
-    plt.axis("off")
+    fig, (plot0, plot1) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 6]})
 
-    plt.subplot(2, 1, 2)
-    plt.imshow(wc_dem.recolor(color_func=recolor_blue), interpolation="bilinear")
-    plt.axis("off")
+    plot0.imshow(wc_rep.recolor(color_func=recolor_red), interpolation="bilinear")
+    plot0.axis("off")
 
-    fig = plt.gcf()
-    fig.set_size_inches(10.5, 18.5)
-    fig.savefig('./wc.png', dpi=200)
+    plot1.imshow(wc_dem.recolor(color_func=recolor_blue), interpolation="bilinear")
+    plot1.axis("off")
 
+    fig.tight_layout()
+    fig.set_size_inches(8, 12)
+    fig.savefig('./wc.png', dpi=300)
     # plt.show()
 
 
