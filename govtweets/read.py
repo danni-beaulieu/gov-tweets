@@ -93,10 +93,10 @@ def parse_tweets(data):
     return data
 
 
-def read_all(data_dir='./data/'):
+def read_all(data_dir='./data/', tweet_files='*.json'):
     "return two data frames: (legislators, tweets)"
     legislators = read_personal_data(data_dir)
-    tweets = read_tweets(data_dir + "/tweets/")
+    tweets = read_tweets(data_dir + "/tweets/", tweet_files)
     legislators = parse_personal_data(legislators)
     tweets = parse_tweets(tweets)
     return (legislators, tweets)
