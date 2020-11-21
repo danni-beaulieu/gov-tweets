@@ -73,6 +73,6 @@ def _main():
     for (text, label) in zip(test_tweets, test_predict):
         print("\nTEXT:%s\nPARTY prediction: %s" % (text, parties_inv.get(label)))
 
-
+# test
 if __name__ == "__main__":
     _main()
