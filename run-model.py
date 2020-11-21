@@ -1,5 +1,6 @@
 
 import nltk
+import pandas
 
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
@@ -13,6 +14,7 @@ import govtweets.model
 
 
 _TRAIN_TEST_SEED = 42
+TEST_CASE_COUNT = 1000
 
 
 def _main():
@@ -51,28 +53,37 @@ def _main():
          test_size=0.2, random_state=_TRAIN_TEST_SEED)
 
     pipeline.fit(tweets_train, labels_train)
-
+    
     print("TRAIN Accuracy:", pipeline.score(tweets_train, labels_train))
     print("TEST Accuracy:", pipeline.score(tweets_test, labels_test))
+    
+    test_tweets_file = pandas.read_csv('test_tweets_dataframe.csv')
+    test_cases = test_tweets_file.head(TEST_CASE_COUNT)
+    test_predict = pipeline.predict(list(test_cases['text']))
+    failed_predictions = 0
+    for (party_prediction, actual_party) in zip(test_predict, list(test_cases['party'])):
+        print('Party prediction: ', parties_inv.get(party_prediction), '; Actual party: ', actual_party)
+        if parties_inv.get(party_prediction) != actual_party:
+            failed_predictions += 1
 
-    test_tweets = [
+    print('Failed predictions: ', failed_predictions, ' out of ', TEST_CASE_COUNT)
+    # test_tweets = [
 
-        """
-        Thankfully, @SpeakerPelosis power to move a radical, far-left agenda
-        through the House was weakened with Republican gains.
-        """,
+    #     """
+    #     Thankfully, @SpeakerPelosis power to move a radical, far-left agenda
+    #     through the House was weakened with Republican gains.
+    #     """,
 
-        """
-        Millions of Americans stood up against Donald Trump and elected decency
-        back to the White House.
-        """
-    ]
+    #     """
+    #     Millions of Americans stood up against Donald Trump and elected decency
+    #     back to the White House.
+    #     """
+    # ]
 
-    test_predict = pipeline.predict(test_tweets)
+    # test_predict = pipeline.predict(test_tweets)
 
-    for (text, label) in zip(test_tweets, test_predict):
-        print("\nTEXT:%s\nPARTY prediction: %s" % (text, parties_inv.get(label)))
+    # for (text, label) in zip(test_tweets, test_predict):
+    #     print("\nTEXT:%s\nPARTY prediction: %s" % (text, parties_inv.get(label)))
 
-# test
 if __name__ == "__main__":
     _main()
