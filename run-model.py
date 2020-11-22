@@ -3,6 +3,7 @@ import nltk
 import pandas
 
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
@@ -56,6 +57,10 @@ def _main():
     
     print("TRAIN Accuracy:", pipeline.score(tweets_train, labels_train))
     print("TEST Accuracy:", pipeline.score(tweets_test, labels_test))
+
+    scores = cross_val_score(pipeline, tweets_persons.text, tweets_persons.party_id, cv=5)
+    print("CROSS VALIDATION SCORES:", scores)
+    print("CROSS VALIDATION MEAN:", scores.mean())
     
     test_tweets_file = pandas.read_csv('test_tweets_dataframe.csv')
     test_cases = test_tweets_file.head(TEST_CASE_COUNT)
