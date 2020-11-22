@@ -38,7 +38,6 @@ def _main():
         ngram_range=(1, 1),
         tokenizer=tokenizer.tokenize,
         stop_words=nltk.corpus.stopwords.words('english'))
-
     pipeline = Pipeline([
         ('vectorizer', count_vect),
         ('tfidf', TfidfTransformer()),
@@ -70,12 +69,14 @@ def _main():
     test_cases = test_tweets_file.head(TEST_CASE_COUNT)
     test_predict = pipeline.predict(list(test_cases['text']))
     failed_predictions = 0
-    for (party_prediction, actual_party) in zip(test_predict, list(test_cases['party'])):
+    for (party_prediction, actual_party, tweet) in zip(test_predict, list(test_cases['party']), list(test_cases['text'])):
         # print('Party prediction: ', parties_inv.get(party_prediction), '; Actual party: ', actual_party)
         if parties_inv.get(party_prediction) != actual_party:
+            # print('Tweet:\n', tweet)
+            # print('Predicted party: ', parties_inv.get(party_prediction), '; Actual party: ', actual_party)
             failed_predictions += 1
 
-    print('Failed predictions: ', failed_predictions, ' out of ', TEST_CASE_COUNT)
+    # print('Failed predictions: ', failed_predictions, ' out of ', TEST_CASE_COUNT)
     # test_tweets = [
 
     #     """
