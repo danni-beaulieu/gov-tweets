@@ -87,9 +87,9 @@ def parse_tweets(data):
     tokenizer = nltk.tokenize.TweetTokenizer()
     data['tokenized'] = data.text.apply(tokenizer.tokenize)
     data['hashtags'] = data.tokenized.apply(
-        lambda words: [w[1:] for w in words if w[0] == '#'])
+        lambda words: [w[1:].lower() for w in words if w[0] == '#' and w != '#'])
     data['references'] = data.tokenized.apply(
-        lambda words: [w[1:] for w in words if w[0] == '@'])
+        lambda words: [w[1:] for w in words if w[0] == '@' and w != '@'])
     return data
 
 
