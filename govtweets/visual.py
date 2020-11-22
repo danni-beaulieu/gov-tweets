@@ -58,3 +58,26 @@ def wordcloud_dem_rep(freq_dem, freq_rep, fname=None, show=True):
 
     if show:
         plt.show()
+
+
+def words_hist(words_freq, color, title=None, fname=None, show=True):
+
+    labels = [word for (word, freq) in words_freq]
+    data = [freq for (word, freq) in words_freq]
+
+    plt.figure()
+
+    plt.yticks(range(len(labels)), labels)
+    plt.barh(range(len(data)), data, color=color, alpha=0.9)
+
+    plt.ylabel('Hashtags')
+    plt.xlabel('Frequency')
+    plt.title(title)
+
+    plt.tight_layout()
+
+    if fname is not None:
+        plt.savefig(fname, dpi=300)
+
+    if show:
+        plt.show()
