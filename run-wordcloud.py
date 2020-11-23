@@ -64,6 +64,11 @@ def _main():
         words_freq_dem, '#224499', 'Most frequent words', 'Democrats',
         './words-dem.png', show=False)
 
+    # Wordcloud for references
+
+    (ref_rep, ref_dem) = words_frequencies(tweets_persons, 'references')
+    govtweets.visual.wordcloud_dem_rep(ref_dem, ref_rep, "./wc-refs.png", show=False)
+
 
 if __name__ == "__main__":
     _main()
