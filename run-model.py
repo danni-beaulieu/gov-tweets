@@ -1,5 +1,7 @@
 
 import nltk
+import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
@@ -7,6 +9,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import learning_curve
 
 import govtweets.read
 import govtweets.model
@@ -72,6 +75,38 @@ def _main():
 
     for (text, label) in zip(test_tweets, test_predict):
         print("\nTEXT:%s\nPARTY prediction: %s" % (text, parties_inv.get(label)))
+
+    (train_sizes, train_scores, test_scores) = learning_curve(
+        pipeline, tweets_persons.text, tweets_persons.party_id,
+        cv=5, scoring='accuracy', train_sizes=np.linspace(0.05, 1.0, 20))
+
+    # Create means and standard deviations of training set scores
+    train_mean = np.mean(train_scores, axis=1)
+    train_std = np.std(train_scores, axis=1)
+
+    # Create means and standard deviations of test set scores
+    test_mean = np.mean(test_scores, axis=1)
+    test_std = np.std(test_scores, axis=1)
+
+    # Draw lines
+    plt.plot(train_sizes, train_mean, '--', color="#111111",  label="Training score")
+    plt.plot(train_sizes, test_mean, color="#111111", label="Cross-validation score")
+
+    # Draw bands
+    plt.fill_between(train_sizes, train_mean - train_std,
+                     train_mean + train_std, color="#DDDDDD")
+
+    plt.fill_between(train_sizes, test_mean - test_std,
+                     test_mean + test_std, color="#DDDDDD")
+
+    # Create plot
+    plt.title("Learning Curve")
+    plt.xlabel("Training Set Size")
+    plt.ylabel("Accuracy Score")
+    plt.legend(loc="best")
+    
+    plt.tight_layout()
+    plt.savefig('./learning-curve.png', dpi=300)
 
 
 if __name__ == "__main__":
