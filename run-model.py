@@ -2,8 +2,11 @@
 import nltk
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas
 
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
@@ -16,6 +19,7 @@ import govtweets.model
 
 
 _TRAIN_TEST_SEED = 42
+TEST_CASE_COUNT = 10000
 
 
 def _main():
@@ -51,13 +55,20 @@ def _main():
     (tweets_train, tweets_test,
      labels_train, labels_test) = train_test_split(
          tweets_persons.text, tweets_persons.party_id,
-         test_size=0.2, random_state=_TRAIN_TEST_SEED)
+         test_size=0.2, random_state=_TRAIN_TEST_SEED,
+         stratify=tweets_persons.party_id)
 
     pipeline.fit(tweets_train, labels_train)
-
+    
     print("TRAIN Accuracy:", pipeline.score(tweets_train, labels_train))
     print("TEST Accuracy:", pipeline.score(tweets_test, labels_test))
-
+    
+    # cv = KFold(n_splits=5, shuffle=True)
+    cv = StratifiedKFold(n_splits=5, shuffle=True)
+    scores = cross_val_score(pipeline, tweets_persons.text, tweets_persons.party_id, cv=cv)
+    print("CROSS VALIDATION SCORES:", scores)
+    print("CROSS VALIDATION MEAN:", scores.mean())
+    
     test_tweets = [
 
         """
@@ -107,7 +118,6 @@ def _main():
     
     plt.tight_layout()
     plt.savefig('./learning-curve.png', dpi=300)
-
 
 if __name__ == "__main__":
     _main()
