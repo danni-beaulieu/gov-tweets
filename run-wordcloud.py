@@ -29,18 +29,40 @@ def words_frequencies(data, colname):
 
 def _main():
 
-    (legislators, tweets) = govtweets.read.read_all(tweet_files='2020-10-*.json')
+    (legislators, tweets) = govtweets.read.read_all(tweet_files='2020-11-*.json')
     tweets_persons = tweets.merge(legislators, left_on='user_id', right_on='twitter_id')
 
-    (ht_rep, ht_dem) = words_frequencies(tweets_persons, 'hashtags')
+    # Get the most popular hashtags for each party and plot them
 
-    govtweets.visual.wordcloud_dem_rep(ht_dem, ht_rep, "./wc.png", show=False)
+    (ht_rep, ht_dem) = words_frequencies(tweets_persons, 'hashtags')
 
     ht_freq_rep = get_top_k(ht_rep)
     ht_freq_dem = get_top_k(ht_dem)
 
-    govtweets.visual.words_hist(ht_freq_rep, '#AA2222', 'Hashtags', 'Republican', './ht-rep.png', show=False)
-    govtweets.visual.words_hist(ht_freq_dem, '#224499', 'Hashtags', 'Democrat', './ht-dem.png', show=False)
+    govtweets.visual.words_hist(
+        ht_freq_rep, '#AA2222', 'Most frequent hashtags', 'Republicans',
+        './ht-rep.png', show=False)
+
+    govtweets.visual.words_hist(
+        ht_freq_dem, '#224499', 'Most frequent hashtags', 'Democrats',
+        './ht-dem.png', show=False)
+
+    govtweets.visual.wordcloud_dem_rep(ht_dem, ht_rep, "./wc.png", show=False)
+
+    # Same as above, but for words
+
+    (words_rep, words_dem) = words_frequencies(tweets_persons, 'clean_tokens')
+
+    words_freq_rep = get_top_k(words_rep)
+    words_freq_dem = get_top_k(words_dem)
+
+    govtweets.visual.words_hist(
+        words_freq_rep, '#AA2222', 'Most frequent words', 'Republicans',
+        './words-rep.png', show=False)
+
+    govtweets.visual.words_hist(
+        words_freq_dem, '#224499', 'Most frequent words', 'Democrats',
+        './words-dem.png', show=False)
 
 
 if __name__ == "__main__":
