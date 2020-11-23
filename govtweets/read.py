@@ -8,6 +8,9 @@ import pandas
 import nltk
 
 
+_STOPWORDS = frozenset(nltk.corpus.stopwords.words('english'))
+
+
 def read_personal_data(data_dir='./data'):
     """
     Read the congressmen personal data and merge it with their
@@ -82,14 +85,23 @@ def read_tweets(data_dir='./data/tweets/', files='*.json'):
     return data
 
 
+def remove_stopwords_etc(tokenized):
+    return [word.lower() for word in tokenized
+            if word[0].isalpha()
+                and word not in {'RT', 'QT'}
+                and not word.startswith('http')
+                and word.lower() not in _STOPWORDS]
+
+
 def parse_tweets(data):
     "Tokenize and extract hashtags and @names"
     tokenizer = nltk.tokenize.TweetTokenizer()
     data['tokenized'] = data.text.apply(tokenizer.tokenize)
+    data['clean_tokens'] = data.tokenized.apply(remove_stopwords_etc)
     data['hashtags'] = data.tokenized.apply(
         lambda words: [w[1:].lower() for w in words if w[0] == '#' and w != '#'])
     data['references'] = data.tokenized.apply(
-        lambda words: [w[1:] for w in words if w[0] == '@' and w != '@'])
+        lambda words: [w[1:].lower() for w in words if w[0] == '@' and w != '@'])
     return data
 
 
